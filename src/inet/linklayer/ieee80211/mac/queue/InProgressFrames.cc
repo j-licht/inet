@@ -102,7 +102,7 @@ void InProgressFrames::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, 
             auto dataheader = CHK(dynamicPtrCast<const Ieee80211DataHeader>(header));
             if (seqAndFragNums.count(std::make_pair(dataheader->getReceiverAddress(), std::make_pair(dataheader->getTid(), SequenceControlField(dataheader->getSequenceNumber(), dataheader->getFragmentNumber())))) != 0) {
                 it = inProgressFrames.erase(it);
-                droppedFrames.push_back(frame);
+                droppedFrames.push_back(*it);
             }
             else
                 it++;
@@ -124,19 +124,25 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 
 void InProgressFrames::clearDroppedFrames()
 {
-    for (auto frame : droppedFrames)
-    //TODO FIXME: delete sometimes cause segfault
+    for (auto frame : droppedFrames) {
         delete frame;
+        frame = nullptr;
+    }
+    //TODO FIXME: delete sometimes cause segfault
     droppedFrames.clear();
 }
 
 InProgressFrames::~InProgressFrames()
 {
-    for (auto frame : inProgressFrames)
+    for (auto frame : inProgressFrames) {
         delete frame;
-    inProgressFrames.clear();
-    for (auto frame : droppedFrames)
+        frame = nullptr;
+    }
+     inProgressFrames.clear();
+    for (auto frame : droppedFrames) {
         delete frame;
+        frame = nullptr;
+    }
     droppedFrames.clear();
 }
 

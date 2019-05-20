@@ -36,7 +36,7 @@ void LayeredProtocolBase::handleUpperMessage(cMessage *message)
     if (!message->isPacket())
         handleUpperCommand(message);
     else {
-        emit(packetReceivedFromUpperSignal, message);
+        //emit(packetReceivedFromUpperSignal, message);
         handleUpperPacket(check_and_cast<Packet *>(message));
     }
 }

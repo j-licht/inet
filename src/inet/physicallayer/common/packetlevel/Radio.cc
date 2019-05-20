@@ -273,8 +273,10 @@ void Radio::handleUpperPacket(Packet *packet)
 {
     emit(packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
-        if (transmissionTimer->isScheduled())
-            throw cRuntimeError("Received frame from upper layer while already transmitting.");
+        if (transmissionTimer->isScheduled()) {
+            EV_ERROR << "Received frame from upper layer while already transmitting. dropping frame." << endl;
+            delete packet;
+        }
         if (separateTransmissionParts)
             startTransmission(packet, IRadioSignal::SIGNAL_PART_PREAMBLE);
         else
@@ -404,6 +406,7 @@ Signal *Radio::createSignal(Packet *packet) const
         delete packet;
         packet = rawPacket;
     }
+    //packet->getName();
     Signal *signal = check_and_cast<Signal *>(medium->transmitPacket(this, packet));
     ASSERT(signal->getDuration() != 0);
     return signal;

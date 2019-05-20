@@ -145,7 +145,7 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         const auto &phyTrailer = makeShared<BitCountChunk>(tailLength + paddingLength);
         packet->insertAtBack(phyTrailer);
     }
-    packet->getTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Phy);
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
