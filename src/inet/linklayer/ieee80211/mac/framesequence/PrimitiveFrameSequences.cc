@@ -362,6 +362,7 @@ IFrameSequenceStep *LastFrameAckFs::prepareStep(FrameSequenceContext *context)
             return new TransmitStep(frame, context->getIfs());
         }
         case 1: {
+            //return nullptr;
             auto txStep = check_and_cast<TransmitStep *>(context->getLastStep());
             auto packet = txStep->getFrameToTransmit();
             auto dataOrMgmtHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();

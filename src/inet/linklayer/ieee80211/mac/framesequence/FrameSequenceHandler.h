@@ -31,6 +31,7 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
         IFrameSequenceHandler::ICallback *callback = nullptr;
         IFrameSequence *frameSequence = nullptr;
         FrameSequenceContext *context = nullptr;
+        bool rts_send = false;
 
     protected:
         virtual void startFrameSequenceStep();

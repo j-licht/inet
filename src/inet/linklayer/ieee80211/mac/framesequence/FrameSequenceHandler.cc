@@ -69,6 +69,7 @@ void FrameSequenceHandler::transmissionComplete()
 
 void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback)
 {
+    rts_send = false;
     this->callback = callback;
     if (!isSequenceRunning()) {
         this->frameSequence = frameSequence;
@@ -95,6 +96,13 @@ void FrameSequenceHandler::startFrameSequenceStep()
                 auto transmitStep = static_cast<TransmitStep *>(nextStep);
                 EV_INFO << "Transmitting, frame = " << transmitStep->getFrameToTransmit() << "\n";
                 callback->transmitFrame(transmitStep->getFrameToTransmit(), transmitStep->getIfs());
+                if (rts_send) {
+                    EV_INFO << "rts was send" << endl;
+                    //finishFrameSequence();
+                }
+                else
+                    EV_INFO << "rts sending" << endl;
+                rts_send = true;
                 // TODO: lifetime
                 // if (auto dataFrame = dynamic_cast<const Ptr<const Ieee80211DataHeader>& >(transmitStep->getFrameToTransmit()))
                 //    transmitLifetimeHandler->frameTransmitted(dataFrame);
@@ -115,6 +123,7 @@ void FrameSequenceHandler::startFrameSequenceStep()
 void FrameSequenceHandler::finishFrameSequenceStep()
 {
     ASSERT(isSequenceRunning());
+    EV_INFO << "Finish Frame Sequence Step" << endl;
     auto lastStep = context->getLastStep();
     auto stepResult = frameSequence->completeStep(context);
     // EV_INFO << "Frame sequence history:" << frameSequence->getHistory() << endl;
@@ -126,11 +135,20 @@ void FrameSequenceHandler::finishFrameSequenceStep()
         lastStep->setCompletion(IFrameSequenceStep::Completion::ACCEPTED);
         switch (lastStep->getType()) {
             case IFrameSequenceStep::Type::TRANSMIT: {
+                EV_INFO << "last step was transmit" << endl;
                 auto transmitStep = static_cast<ITransmitStep *>(lastStep);
                 callback->originatorProcessTransmittedFrame(transmitStep->getFrameToTransmit());
+                if (rts_send) {
+                    EV_INFO << "rts was send" << endl;
+                    //finishFrameSequence();
+                }
+                else
+                    EV_INFO << "rts sending" << endl;
+                rts_send = true;
                 break;
             }
             case IFrameSequenceStep::Type::RECEIVE: {
+                EV_INFO << "last step was receive" << endl;
                 auto receiveStep = static_cast<IReceiveStep *>(lastStep);
                 auto transmitStep = check_and_cast<ITransmitStep *>(context->getStepBeforeLast());
                 callback->originatorProcessReceivedFrame(receiveStep->getReceivedFrame(), transmitStep->getFrameToTransmit());

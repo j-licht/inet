@@ -136,8 +136,8 @@ void Dcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
         ctsProcedure->processTransmittedCts(ctsFrame);
     else if (auto ackFrame = dynamicPtrCast<const Ieee80211AckFrame>(header))
         recipientAckProcedure->processTransmittedAck(ackFrame);
-    else
-        throw cRuntimeError("Unknown control response frame");
+    //else
+        //throw cRuntimeError("Unknown control response frame");
 }
 
 void Dcf::scheduleStartRxTimer(simtime_t timeout)
@@ -244,6 +244,7 @@ FrameSequenceContext* Dcf::buildContext()
 
 void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    EV_INFO << "Dcf::transmissionComplete" << endl;
     if (frameSequenceHandler->isSequenceRunning()) {
         frameSequenceHandler->transmissionComplete();
         updateDisplayString();
@@ -288,8 +289,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
             recoveryProcedure->multicastFrameTransmitted(stationRetryCounters);
             inProgressFrames->dropFrame(packet);
         }
-        inProgressFrames->dropFrame(packet);
-        std::cout << "foo" << std::endl;
+        //inProgressFrames->dropFrame(packet);
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
         auto protectedFrame = inProgressFrames->getFrameToTransmit(); // KLUDGE:

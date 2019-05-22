@@ -108,6 +108,7 @@ std::tuple<MacAddress, SequenceNumber, Tid> OriginatorQosAckPolicy::computeBlock
 
 AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
 {
+    return AckPolicy::NO_ACK;
     if (agreement == nullptr)
         return AckPolicy::NORMAL_ACK;
     if (agreement->getIsAddbaResponseReceived() && isBlockAckPolicyEligibleFrame(packet, header)) {
