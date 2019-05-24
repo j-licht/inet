@@ -87,6 +87,9 @@ void Contention::startContention(int cw, simtime_t ifs, simtime_t eifs, simtime_
     this->slotTime = slotTime;
     this->callback = callback;
     backoffSlots = intrand(cw + 1);
+    if(backoffSlots < 0) {
+        throw cRuntimeError("backoffslots1");
+    }
     EV_DETAIL << "Starting contention: cw = " << cw << ", slots = " << backoffSlots << endl;
     handleWithFSM(START);
 }
@@ -235,8 +238,13 @@ void Contention::computeRemainingBackoffSlots()
 {
     simtime_t remainingTime = scheduledTransmissionTime - simTime();
     int remainingSlots = (remainingTime.raw() + slotTime.raw() - 1) / slotTime.raw();
-    if (remainingSlots < backoffSlots) // don't count IFS
+    if (remainingSlots < backoffSlots) { // don't count IFS
         backoffSlots = remainingSlots;
+        std::cout << "remaingTime " << remainingTime.raw() << " slottime " <<  slotTime.raw() << " = " << (remainingTime.raw() + slotTime.raw() - 1) << endl;
+        if(backoffSlots < 0) {
+            throw cRuntimeError("backoffslots");
+        }
+    }
 }
 
 // TODO: we should call it when internal collision occurs after backoff optimization

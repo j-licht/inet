@@ -61,6 +61,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
+    EV_INFO << "transmitFrame: " << packet->getName() << endl;
     take(packet);
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
@@ -86,7 +87,13 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
-    cancelEvent(endIfsTimer);
+    if (endIfsTimer->isScheduled()) {
+        throw cRuntimeError("endif is schedulerd");
+    }
+    if (transmitting) {
+        throw cRuntimeError("transmitting");
+    }
+    //cancelEvent(endIfsTimer);
     scheduleAt(simTime() + ifs, endIfsTimer);
     if (hasGUI())
         refreshDisplay();

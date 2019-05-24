@@ -274,8 +274,9 @@ void Radio::handleUpperPacket(Packet *packet)
     emit(packetReceivedFromUpperSignal, packet);
     if (isTransmitterMode(radioMode)) {
         if (transmissionTimer->isScheduled()) {
-            EV_ERROR << "Received frame from upper layer while already transmitting. dropping frame." << endl;
-            delete packet;
+            throw cRuntimeError("Received frame from upper layer while already transmitting.");
+            //EV_ERROR << "Received frame from upper layer while already transmitting. dropping frame." << endl;
+            //delete packet;
         }
         if (separateTransmissionParts)
             startTransmission(packet, IRadioSignal::SIGNAL_PART_PREAMBLE);

@@ -289,7 +289,7 @@ void Dcf::originatorProcessTransmittedFrame(Packet *packet)
             recoveryProcedure->multicastFrameTransmitted(stationRetryCounters);
             inProgressFrames->dropFrame(packet);
         }
-        //inProgressFrames->dropFrame(packet);
+        inProgressFrames->dropFrame(packet);
     }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(transmittedHeader)) {
         auto protectedFrame = inProgressFrames->getFrameToTransmit(); // KLUDGE:
