@@ -215,9 +215,12 @@ void Dcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader));
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header))
         sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
-    else { // TODO: else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
-        sendUp(recipientDataService->controlFrameReceived(packet, header));
+    else if (auto ctrlFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
         recipientProcessControlFrame(packet, header);
+        delete packet;
+    }
+    else { // TODO:
+        sendUp(recipientDataService->controlFrameReceived(packet, header));
         delete packet;
     }
 }

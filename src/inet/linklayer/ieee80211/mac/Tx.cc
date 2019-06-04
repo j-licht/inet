@@ -58,6 +58,7 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
 
 void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, ITx::ICallback *txCallback)
 {
+    if (transmitting || endIfsTimer->isScheduled()  ) return;
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
     Enter_Method("transmitFrame(\"%s\")", packet->getName());
@@ -88,9 +89,11 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
     if (endIfsTimer->isScheduled()) {
+        std::cout << packet->getName() << std::endl;
         throw cRuntimeError("endif is schedulerd");
     }
     if (transmitting) {
+        std::cout << packet->getName() << std::endl;
         throw cRuntimeError("transmitting");
     }
     //cancelEvent(endIfsTimer);
