@@ -36,6 +36,8 @@
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
+#include <chrono>
+
 namespace inet {
 namespace ieee80211 {
 
@@ -387,6 +389,7 @@ void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211Da
 
 void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    auto begin = std::chrono::system_clock::now();
     Enter_Method("processLowerFrame(\"%s\")", packet->getName());
     take(packet);
     if (mib->qos)
@@ -394,6 +397,9 @@ void Ieee80211Mac::processLowerFrame(Packet *packet, const Ptr<const Ieee80211Ma
     else
         // TODO: what if the received frame is ST_DATA_WITH_QOS? drop?
         dcf->processLowerFrame(packet, header);
+    auto end = std::chrono::system_clock::now();
+    auto delay = end - begin;
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << " 802mac_lower: " << std::chrono::duration_cast<std::chrono::microseconds>(delay).count() << std::endl;
 }
 
 // FIXME

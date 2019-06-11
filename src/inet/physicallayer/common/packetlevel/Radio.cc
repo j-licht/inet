@@ -22,6 +22,8 @@
 #include "inet/physicallayer/common/packetlevel/RadioMedium.h"
 #include "inet/physicallayer/common/packetlevel/SignalTag_m.h"
 
+#include <chrono>
+
 #ifdef NS3_VALIDATION
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #endif
@@ -209,6 +211,7 @@ void Radio::handleMessageWhenDown(cMessage *message)
 
 void Radio::handleSelfMessage(cMessage *message)
 {
+    auto begin = std::chrono::system_clock::now();
     if (message == switchTimer)
         handleSwitchTimer(message);
     else if (message == transmissionTimer)
@@ -217,6 +220,9 @@ void Radio::handleSelfMessage(cMessage *message)
         handleReceptionTimer(message);
     else
         throw cRuntimeError("Unknown self message");
+    auto end = std::chrono::system_clock::now();
+    auto delay = end - begin;
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << " radio_selfmsg: " << std::chrono::duration_cast<std::chrono::microseconds>(delay).count() << std::endl;
 }
 
 void Radio::handleSwitchTimer(cMessage *message)
@@ -290,11 +296,17 @@ void Radio::handleUpperPacket(Packet *packet)
 
 void Radio::handleSignal(Signal *signal)
 {
+
+    auto begin = std::chrono::system_clock::now();
     auto receptionTimer = createReceptionTimer(signal);
     if (separateReceptionParts)
         startReception(receptionTimer, IRadioSignal::SIGNAL_PART_PREAMBLE);
     else
         startReception(receptionTimer, IRadioSignal::SIGNAL_PART_WHOLE);
+    auto end = std::chrono::system_clock::now();
+
+    auto delay = end - begin;
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << " radio_signal: " << std::chrono::duration_cast<std::chrono::microseconds>(delay).count() << std::endl;
 }
 
 void Radio::handleStartOperation(LifecycleOperation *operation)
@@ -467,6 +479,7 @@ void Radio::continueReception(cMessage *timer)
 
 void Radio::endReception(cMessage *timer)
 {
+    auto begin = std::chrono::system_clock::now();
     auto part = (IRadioSignal::SignalPart)timer->getKind();
     auto signal = static_cast<Signal *>(timer->getControlInfo());
     auto arrival = signal->getArrival();
@@ -489,6 +502,9 @@ void Radio::endReception(cMessage *timer)
     delete timer;
     // TODO: move to radio medium
     check_and_cast<RadioMedium *>(medium)->emit(IRadioMedium::signalArrivalEndedSignal, check_and_cast<const cObject *>(reception));
+    auto end = std::chrono::system_clock::now();
+    auto delay = end - begin;
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << " radio_end_reciption: " << std::chrono::duration_cast<std::chrono::microseconds>(delay).count() << std::endl;
 }
 
 void Radio::abortReception(cMessage *timer)

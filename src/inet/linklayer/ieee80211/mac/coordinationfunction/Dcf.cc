@@ -22,6 +22,8 @@
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
 
+#include <chrono>
+
 namespace inet {
 namespace ieee80211 {
 
@@ -148,6 +150,7 @@ void Dcf::scheduleStartRxTimer(simtime_t timeout)
 
 void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
+    auto begin = std::chrono::system_clock::now();
     Enter_Method_Silent();
     if (frameSequenceHandler->isSequenceRunning()) {
         // TODO: always call processResponses
@@ -173,6 +176,9 @@ void Dcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         emit(packetDroppedSignal, packet, &details);
         delete packet;
     }
+    auto end = std::chrono::system_clock::now();
+    auto delay = end - begin;
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << " mac_lower: " << std::chrono::duration_cast<std::chrono::microseconds>(delay).count() << std::endl;
 }
 
 void Dcf::transmitFrame(Packet *packet, simtime_t ifs)
@@ -324,7 +330,7 @@ void Dcf::originatorProcessReceivedFrame(Packet *receivedPacket, Packet *lastTra
 
 void Dcf::originatorProcessFailedFrame(Packet *failedPacket)
 {
-    EV_INFO << "Data/Mgmt frame transmission failed\n";
+    std::cout << "Data/Mgmt frame transmission failed" << std::endl;
     const auto& failedHeader = failedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
     ASSERT(failedHeader->getType() != ST_DATA_WITH_QOS);
     ASSERT(ackHandler->getAckStatus(failedHeader) == AckHandler::Status::WAITING_FOR_ACK);

@@ -26,6 +26,7 @@
 #include <net/if.h>
 #include <netinet/ether.h>
 #include <sys/ioctl.h>
+#include <chrono>
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/NetworkNamespaceContext.h"
@@ -174,6 +175,9 @@ bool ExtIpv4SocketUpper::notify(int fd)
         delete packet;
         return true;
     }
+    //if (srcAddress.str() == "10.0.1.2")
+        //std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
+        //std::cerr << simTime().raw() << std::endl;
     packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(ipv4Header->getDestAddress());
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     MacAddress macAddr = arp->resolveL3Address(ipv4Header->getDestAddress(), ie);

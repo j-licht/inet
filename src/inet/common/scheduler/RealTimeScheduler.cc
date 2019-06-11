@@ -24,6 +24,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/scheduler/RealTimeScheduler.h"
+#include <chrono>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
@@ -94,6 +95,7 @@ void RealTimeScheduler::advanceSimTime()
 
 bool RealTimeScheduler::receiveWithTimeout(long usec)
 {
+    std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << std::endl;
 #ifdef __linux__
     bool found = false;
     timeval timeout;
