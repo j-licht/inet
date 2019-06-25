@@ -86,6 +86,10 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     packet->insertAtBack(updatedTrailer);
     this->frame = packet->dup();
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);    // we are idle
+    if (endIfsTimer->isScheduled() || transmitting) {
+        std::cout << packet->getName() << std::endl;
+        //throw cRuntimeError("try to transmit while already transmitting");
+    }
     cancelEvent(endIfsTimer);
     scheduleAt(simTime() + ifs, endIfsTimer);
     if (hasGUI())

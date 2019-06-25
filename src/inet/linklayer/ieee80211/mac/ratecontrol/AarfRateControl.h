@@ -37,6 +37,7 @@ class INET_API AarfRateControl : public RateControlBase
         int decreaseThreshold = -1;
         double factor = -1;
 
+        int numberOfConsFailedTransmissions = 0;
         int numberOfConsSuccTransmissions = 0;
 
     protected:

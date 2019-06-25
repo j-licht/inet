@@ -76,8 +76,14 @@ const IIeee80211Mode *Ieee80211TransmitterBase::computeTransmissionMode(const Pa
         transmissionMode = modeSet->getMode(bitrateReq->getDataBitrate());
     else
         transmissionMode = mode;
-    if (transmissionMode == nullptr)
+    if (transmissionMode == nullptr) {
+        if (modeReq == nullptr)
+            std::cout << "no modereq" << std::endl;
+        if (bitrateReq == nullptr) {
+            std::cout << "no bitrratereq" << std::endl;
+        }
         throw cRuntimeError("Transmission mode is undefined");
+    }
     return transmissionMode;
 }
 

@@ -70,9 +70,10 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
         multiplyIncreaseThreshold(factor);
         resetTimer();
     }
-    else if (!isSuccessful && retryCount >= decreaseThreshold - 1) // decreaseThreshold consecutive failed transmissions
+    else if (!isSuccessful && (retryCount >= decreaseThreshold || numberOfConsFailedTransmissions >= decreaseThreshold - 1)) // decreaseThreshold consecutive failed transmissions
     {
         numberOfConsSuccTransmissions = 0;
+        numberOfConsFailedTransmissions = 0;
         currentMode = decreaseRateIfPossible(currentMode);
         emitDatarateSignal();
         updateDisplayString();
@@ -82,6 +83,8 @@ void AarfRateControl::frameTransmitted(Packet *frame, int retryCount, bool isSuc
     }
     else if (isSuccessful && retryCount == 0)
         numberOfConsSuccTransmissions++;
+    else if (!isSuccessful && retryCount == 1) //happens if there are no retries cauesed by retrylimit=0
+        numberOfConsFailedTransmissions++;
 
     if (numberOfConsSuccTransmissions == increaseThreshold)
     {
