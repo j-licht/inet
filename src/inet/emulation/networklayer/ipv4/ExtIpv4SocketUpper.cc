@@ -58,6 +58,7 @@ void ExtIpv4SocketUpper::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         device = par("device").stdstringValue();
         srcAddress = Ipv4Address(par("srcAddress").stringValue());
+        destAddress = L3Address(par("destAddress").stringValue());
         packetNameFormat = par("packetNameFormat");
         rtScheduler = check_and_cast<RealTimeScheduler *>(getSimulation()->getScheduler());
         arp = getModuleFromPar<IArp>(par("arpModule"), this);
@@ -169,7 +170,7 @@ bool ExtIpv4SocketUpper::notify(int fd)
 
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     EV_INFO << getFullPath() << ": Received a " << packet->getTotalLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << ".\n";
-    if (ipv4Header->getSourceAddress().str() != srcAddress.str() || !ipv4Header->getDestinationAddress().matches(L3Address("10.0.0.0"), 24)) {
+    if (ipv4Header->getSourceAddress().str() != srcAddress.str() || !ipv4Header->getDestinationAddress().matches(destAddress, 24)) {
         EV_INFO << getFullPath() << ": drop packet src address is not machting: " << ipv4Header->getSourceAddress().str() << " != " << srcAddress.str() << ".\n";
         delete packet;
         return true;

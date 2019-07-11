@@ -31,6 +31,7 @@ simple ExtIpv4SocketUpper
         @display("i=block/rxtx");
         string device;
         string srcAddress;
+        string destAddress;
         string arpModule;
         string interfaceTableModule;
         @signal[packetSentToLower](type=Packet);

@@ -30,6 +30,7 @@ class INET_API ExtIpv4SocketUpper : public cSimpleModule, public RealTimeSchedul
     // parameters
     std::string device;
     Ipv4Address srcAddress;
+    L3Address destAddress;
     const char *packetNameFormat = nullptr;
     RealTimeScheduler *rtScheduler = nullptr;
 
