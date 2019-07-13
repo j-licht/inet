@@ -352,7 +352,7 @@
         name="Network emulation support"
         description = "Support for connecting the simulation to a real network.
                        This feature currently works on Linux systems only."
-        initiallyEnabled = "false"
+        initiallyEnabled = "true"
         requires = "Ethernet IPv4"
         labels = "nic"
         nedPackages = "
