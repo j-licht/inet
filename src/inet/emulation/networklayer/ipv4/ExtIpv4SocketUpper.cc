@@ -42,10 +42,15 @@
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/udp/UdpHeader_m.h"
 #include "inet/transportlayer/udp/Udp.h"
+#include <unordered_map>
 
 namespace inet {
 
-Define_Module(ExtIpv4SocketUpper);
+std::unordered_map<uint, simtime_t> u;
+uint numofvalues = 0;
+double summe = 0;
+
+Define_Module(ExtIpv4SocketUpper)
 
 ExtIpv4SocketUpper::~ExtIpv4SocketUpper()
 {
@@ -103,6 +108,20 @@ void ExtIpv4SocketUpper::handleMessage(cMessage *msg)
 
     //int sent = ::send(fd, buffer, packetLength, 0);
     int sent = sendto(fd, buffer, packetLength, 0, (struct sockaddr *)&ip_addr, sizeof(ip_addr));
+
+    const char* pname = packet->getName();
+    pname += 9;
+    uint index = atoi(pname);
+    double diff = (simTime() - u[index]).dbl();
+    summe += diff;
+    numofvalues++;
+    if (numofvalues == 100) {
+        std::cerr << std::time(0) << " " << summe << std::endl;
+        summe = 0.0;
+        numofvalues = 0;
+    }
+    //std::cout << getFullPath() << "  " << simTime() - u[index] << "   " << index << std::endl;
+    u.erase(index);
     if ((size_t)sent == packetLength) {
         EV << "Sent " << sent << " bytes packet.\n";
         numSent++;
@@ -166,7 +185,8 @@ bool ExtIpv4SocketUpper::notify(int fd)
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
     //packet->addTag<DispatchProtocolReq>()->setProtocol(&Protocol::ipv4);
     packet->addTag<InterfaceReq>()->setInterfaceId(101);
-    packet->setName(packetPrinter.printPacketToString(packet, packetNameFormat).c_str());
+    std::string pname = packetPrinter.printPacketToString(packet, packetNameFormat);
+    packet->setName(pname.c_str());
 
     const auto& ipv4Header = packet->peekAtFront<Ipv4Header>();
     EV_INFO << getFullPath() << ": Received a " << packet->getTotalLength() << " packet from " << ipv4Header->getSrcAddress() << " to " << ipv4Header->getDestAddress() << ".\n";
@@ -175,6 +195,10 @@ bool ExtIpv4SocketUpper::notify(int fd)
         delete packet;
         return true;
     }
+    uint index = std::stoi(pname.substr(9));
+    //Ext -UDP --0
+    //012 3456 789
+    u[index] = simTime();
     packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(ipv4Header->getDestAddress());
     const InterfaceEntry *ie = ift->getInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
     MacAddress macAddr = arp->resolveL3Address(ipv4Header->getDestAddress(), ie);
